@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using NS2_VS.Services;
 using System.Collections;
 using System.Text.Json;
@@ -12,14 +11,17 @@ namespace NS2_VS.Controllers
     {
         private ICrawlerService _crawlerService;
         private readonly ILogger<NS2VSController> _logger;
-        public NS2VSController(ILogger<NS2VSController> logger, ICrawlerService crawlerService)
+        private IPlayerComparisonService _playerComparisonService;
+        public NS2VSController(ILogger<NS2VSController> logger, ICrawlerService crawlerService,
+            IPlayerComparisonService playerComparisonService)
         {
             _logger = logger;
             _crawlerService = crawlerService;
+            _playerComparisonService = playerComparisonService;
         }
-
+        //Task<JsonDocument> stub
         [HttpPost(Name = "GetPlayerComparison")]
-        public async Task<JsonDocument> Post(string playerOneId, string playerTwoId)
+        public async void Post(string playerOneId, string playerTwoId)
         {
 
             try
@@ -28,13 +30,26 @@ namespace NS2_VS.Controllers
 
                 var crawlerResult = await _crawlerService.GetPlayerComparison(playerIds);
 
-                //transform
-                return crawlerResult;                
+                try
+                {
+                    //explicit for clarity
+                    Player[] crawlerResults = JsonSerializer.Deserialize<Player[]>(crawlerResult);
+
+                    // process crawler results
+                    _playerComparisonService.ProcessPlayerComparison(crawlerResults);                
+
+                } catch (JsonException e)
+                {
+                    _logger.LogError(e.ToString());
+                    throw;
+                }
+               
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return null;
+                throw;
             }
         }
     }

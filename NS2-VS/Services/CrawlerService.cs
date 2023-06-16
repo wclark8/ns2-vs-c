@@ -16,10 +16,8 @@ namespace NS2_VS.Services
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
-        // write dto
         public async Task<JsonDocument> GetPlayerComparison(Array playerIds)
         {
-            //var serializer = new JsonSerializer();
             var request = CreateRequest(playerIds);
             using (var result = await _httpClient.PostAsync(_httpClient.BaseAddress + PLAYERSENDPOINT, request).ConfigureAwait(false))
             {

@@ -13,12 +13,17 @@ namespace NS2_VS
             // Add services to the container.
 
             builder.Services.AddControllers();
+            
+            // make use of httpclient factory for di
             builder.Services.AddHttpClient<ICrawlerService, CrawlerService>( client =>
             {
                 // add build time config
                 client.BaseAddress = new Uri("http://localhost:3000");
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                // support longer timeout
             });
+
+            builder.Services.AddSingleton<IPlayerComparisonService, PlayerComparisonService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -44,34 +49,7 @@ namespace NS2_VS
 
             app.Run();
 
-            //ComparePlayers("53147432", "854961158").GetAwaiter().GetResult();
         }
-        /*
-        static async Task ComparePlayers(string playerOneId, string playerTwoId)
-        {
-            // Update port # in the following line.
-            client.BaseAddress = new Uri("http://localhost:3000/");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-
-            try
-            {
-
-                string[] playerIds = new string[2] { playerOneId, playerTwoId };
-                HttpResponseMessage response = await client.PostAsJsonAsync("/players", playerIds);
-                if(response.IsSuccessStatusCode)
-                {
-                    
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-            Console.ReadLine();
-        }*/
+       
     }
 }
